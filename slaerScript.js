@@ -22,6 +22,9 @@ var agOnly = nonUrban.filter(ee.Filter.neq("Crop2014", "Idle"));
 var almonds = fc.filter(ee.Filter.eq("Crop2014", "Almonds"));  
 var grapes = fc.filter(ee.Filter.eq("Crop2014", "Grapes"));
 
+var colors = {
+  
+};
 
 
 function vizCrop(){ //visualizing crops by shading the area with a color
@@ -29,7 +32,8 @@ function vizCrop(){ //visualizing crops by shading the area with a color
    Map.addLayer(grapes.draw({color: '9400D3', strokeWidth: 2}), {}, 'grapes');
 }
 function agLand(){ //focusing on 
-  Map.addLayer(nonUrban, {palette: colors});
+  Map.addLayer(timeLapse, trueColors, "Images from 2017");
+  Map.addLayer(nonUrban,colors, "Crop2014", true, .5);
   Map.setCenter(-120.98891 , 37.6617049, 10);
 }
 
@@ -44,8 +48,5 @@ var fallowedLand;
 
 nonUrban.iterate(checkFallowed);
 
-
-Map.addLayer(timeLapse, trueColors, "Images from 2017");
-
-//agLand();
+agLand();
 //vizCrop()
