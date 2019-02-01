@@ -4,8 +4,8 @@
 var dataset = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
                   .filterDate('2018-7-01', '2018-7-10');
 
-//Selects the color bans RGB
-var timeLapse = dataset.select(['B4', 'B3', 'B2']);
+//Selects the color bans NIR - Red - Green
+var timeLapse = dataset.select(['B5', 'B4', 'B3']);
 
 var trueColors = {
   min: 4000,
@@ -13,53 +13,38 @@ var trueColors = {
   max: 12000,
 };
 
-
-//Data from the Crop2014
-var fc = ee.FeatureCollection(table).select("Crop2014");
-
 //Removes the urban + idle land from the map and dataset
-var nonUrban = fc.filter(ee.Filter.neq("Crop2014", "Urban"));
+var nonUrban = table.filter(ee.Filter.neq("Crop2014", "Urban"));
 
-function getRGB(plot){
-  var R, G, B, rTotal, gTotal, bTotal;
+function getNDVI(plot){
+  var NIR, R, G, rTotal, gTotal, nirTotal;
+  //Work on a better method to grab more pixels for a better average
+  var pixel = ee.List(plot.get(100));
   
-  rTotal = ee.Number(0);
-  gTotal = ee.Number(0);
-  bTotal = ee.Number(0);
+  NIR = ee.Number(pixel.get(4));
+  R = ee.Number(pixel.get(5));
   
-  for(var i = 1; i < 4; i++){
-    var pixel = ee.List(plot.get(i));
-    R = ee.Number(pixel.get(4));
-    G = ee.Number(pixel.get(5));
-    B = ee.Number(pixel.get(6));
-    
-    rTotal.add(R);
-    gTotal.add(G);
-    bTotal.add(B);
-  
-    print(R);
-    print(rTotal);
-  }
-    
-  var rgbVals = [rTotal, gTotal, bTotal];
-  
-  return rgbVals;
+  return NIR.subtract(R).divide(NIR.add(R));
 }
 
 
-var fallowedLand = nonUrban.map(function(feature){
+var checkFallow = function(feature){
+    //Need to fix this to be able to grab the correct geomotries
     var cords = nonUrban.first().geometry();
-    var plot = ee.List(timeLapse.getRegion(cords,20));
-    var rgbVals = getRGB(plot);
     
-    if(rgbVals[0] < rgbVals[1] && rgbVals[0] < rgbVals[2]){
+    var plot = ee.List(timeLapse.getRegion(cords,21));
+    var NDVI = getNDVI(plot);
+    print(NDVI);
+    if(NDVI.lt(0.4)){
       return feature.set({isFallowed: true});
     }
+    else{
       return feature.set({isFallowed: false});
-  
-});
+    }
+};
 
-
+var fallowFeatureColection = nonUrban.map(checkFallow);
+print(fallowFeatureColection.first());
 var colors = {
   
 };
@@ -72,7 +57,7 @@ function vizCrop(){ //visualizing crops by shading the area with a color
 
 function agLand(){ //focusing on 
   Map.addLayer(timeLapse, trueColors, "Images from 2017");
-  Map.addLayer(table,colors, "Crop2014", true, .5);
+  Map.addLayer(fallowFeatureColection,colors, "Crop2014", true, .5);
   //Map.setCenter(-120.98891 , 37.6617049, 10);
   Map.setCenter(-121.51825258634209, 41.99345475520686, 15);
 }
