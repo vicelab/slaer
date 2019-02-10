@@ -16,35 +16,38 @@ var trueColors = {
 //Removes the urban + idle land from the map and dataset
 var nonUrban = table.filter(ee.Filter.neq("Crop2014", "Urban"));
 
-function getNDVI(plot){
-  var NIR, R, G, rTotal, gTotal, nirTotal;
-  //Work on a better method to grab more pixels for a better average
-  var pixel = ee.List(plot.get(100));
-  
-  NIR = ee.Number(pixel.get(4));
-  R = ee.Number(pixel.get(5));
-  
-  return NIR.subtract(R).divide(NIR.add(R));
+var calcNDVI = function(image){
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
 }
 
+var NDVILapse = timeLapse.map(calcNDVI);
+
+function getNDVI(plot){
+  
+  var pixel = ee.List(plot.get(100));
+  
+  return 0;
+}
 
 var checkFallow = function(feature){
     //Need to fix this to be able to grab the correct geomotries
-    var cords = nonUrban.first().geometry();
+    var cords = feature.geometry();
+    var plotGeo = ee.List(NDVILapse.getRegion(cords,21));
+    var plotNDVI = ee.Number(getNDVI(plotGeo));
     
-    var plot = ee.List(timeLapse.getRegion(cords,21));
-    var NDVI = getNDVI(plot);
-    print(NDVI);
-    if(NDVI.lt(0.4)){
+    if(plotNDVI.lt(0.3) == 1){
+      console.log("True");
       return feature.set({isFallowed: true});
     }
     else{
+      console.log("False");
       return feature.set({isFallowed: false});
     }
 };
 
 var fallowFeatureColection = nonUrban.map(checkFallow);
-print(fallowFeatureColection.first());
+
 var colors = {
   
 };
@@ -56,7 +59,7 @@ function vizCrop(){ //visualizing crops by shading the area with a color
 }
 
 function agLand(){ //focusing on 
-  Map.addLayer(timeLapse, trueColors, "Images from 2017");
+  Map.addLayer(NDVILapse, trueColors, "Images from 2017");
   Map.addLayer(fallowFeatureColection,colors, "Crop2014", true, .5);
   //Map.setCenter(-120.98891 , 37.6617049, 10);
   Map.setCenter(-121.51825258634209, 41.99345475520686, 15);
@@ -64,7 +67,7 @@ function agLand(){ //focusing on
 
 
 var roi = (-120.44082212108907, 37.31763621977258); //region of interest currently over Merced
-var trainingSet = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
+var trainingSet = ee.ImageCollection('LAN DSAT/LC08/C01/T1_RT')
                   .filterDate('2018-7-01', '2018-7-10');
 
 
