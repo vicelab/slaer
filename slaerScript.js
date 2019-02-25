@@ -1,4 +1,3 @@
-//Imported Data Via Google Earth Engine
 //Dataset of satellite images from 2013 till real time.
 //Will use times around harvests to ensure the crops get to grow and show color
 var dataset = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
@@ -23,30 +22,51 @@ var calcNDVI = function(image){
 
 var NDVILapse = timeLapse.map(calcNDVI);
 
-function getNDVI(plot){
-  
-  var pixel = ee.List(plot.get(100));
-  
-  return 0;
+//Get a overview of the planting patterns in california.
+var NDVIChart = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT').map(calcNDVI);
+NDVIChart = NDVIChart.select("NDVI");
+Map.addLayer(NDVIChart,{min:0, max:1}, "NDVI")
+var geom = ee.Geometry.Point(-121.300833333, 37.9755555556).buffer(1000);
+print(ui.Chart.image.series(NDVIChart, geom, ee.Reducer.mean(), 30));
+
+function createNDVIList(list){
+  var returnList = ee.List([]);
+  for(var i = 0; i < 100; i++){
+    returnList.add(ee.List(list.get(i)).get(7));
+  }
+  return returnList;
 }
+
+function getNDVI(plot){
+  var meanNDVI = ee.Number(0);
+  var NDVIList = createNDVIList(plot);
+  meanNDVI = NDVIList.reduce(ee.Reducer.mean());
+  return ee.Number(meanNDVI);
+}
+
+function getTempNDVI(plot){
+  var sampleList = ee.Number(ee.List(plot.get(100)).get(7));
+  sampleList = sampleList.add(ee.Number(ee.List(plot.get(150)).get(7)));
+  sampleList = sampleList.add(ee.Number(ee.List(plot.get(200)).get(7)));
+  sampleList = sampleList.add(ee.Number(ee.List(plot.get(250)).get(7)));
+  sampleList = sampleList.add(ee.Number(ee.List(plot.get(300)).get(7)));
+  sampleList = sampleList.add(ee.Number(ee.List(plot.get(350)).get(7)));
+  sampleList = sampleList.add(ee.Number(ee.List(plot.get(400)).get(7)));
+  sampleList = sampleList.add(ee.Number(ee.List(plot.get(450)).get(7)));
+  sampleList = sampleList.divide(8);
+  return sampleList;
+}
+
 
 var checkFallow = function(feature){
     //Need to fix this to be able to grab the correct geomotries
-    var cords = feature.geometry();
+    var cords = ee.List(feature.geometry());
     var plotGeo = ee.List(NDVILapse.getRegion(cords,21));
-    var plotNDVI = ee.Number(getNDVI(plotGeo));
-    
-    if(plotNDVI.lt(0.3) == 1){
-      console.log("True");
-      return feature.set({isFallowed: true});
-    }
-    else{
-      console.log("False");
-      return feature.set({isFallowed: false});
-    }
+    var plotNDVI = ee.Number(getTempNDVI(plotGeo));
+    return ee.Algorithms.If(plotNDVI.lt(0.35), feature.set({isFallowed: true}), feature.set({isFallowed: false}))
 };
 
-var fallowFeatureColection = nonUrban.map(checkFallow);
+var fallowFeatureColection = ee.FeatureCollection(nonUrban.map(checkFallow));
 
 var colors = {
   
