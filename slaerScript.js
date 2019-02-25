@@ -68,6 +68,7 @@ var checkFallow = function(feature){
 
 var fallowFeatureColection = ee.FeatureCollection(nonUrban.map(checkFallow));
 
+print (nonUrban.first());
 var colors = {
   
 };
