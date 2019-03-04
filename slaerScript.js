@@ -1,4 +1,3 @@
-//Imported Data Via Google Earth Engine
 //Dataset of satellite images from 2013 till real time.
 //Will use times around harvests to ensure the crops get to grow and show color
 var dataset = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
@@ -22,6 +21,13 @@ var calcNDVI = function(image){
 }
 
 var NDVILapse = timeLapse.map(calcNDVI);
+
+//Get a overview of the planting patterns in california.
+var NDVIChart = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT').map(calcNDVI);
+NDVIChart = NDVIChart.select("NDVI");
+Map.addLayer(NDVIChart,{min:0, max:1}, "NDVI")
+var geom = ee.Geometry.Point(-121.300833333, 37.9755555556).buffer(1000);
+print(ui.Chart.image.series(NDVIChart, geom, ee.Reducer.mean(), 30));
 
 function createNDVIList(list){
   var returnList = ee.List([]);
