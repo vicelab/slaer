@@ -1,4 +1,4 @@
-Map.setCenter(-119.26, 35.37);
+Map.setCenter(-119.44,35.65);
 
 //Filter
 var image = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
@@ -7,25 +7,37 @@ var image = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
   .sort('CLOUD_COVER')
   .first());
 Map.addLayer(all_fallow);
-Map.addLayer(image, {bands: ['B5', 'B4', 'B3']}, 'image');
+Map.addLayer(image, {bands: ['B5', 'B4', 'B3']}, 'Landsat');
 
 //Merging imports of sample regions into one feature collection 
-var trainingFC = not_fallowed.merge(fallowed);
-//print(trainingFC);
+var trainingFC = fallowed.merge(not_fallowed);
 
 //Training data
-var bands = ['B2','B3','B4','B5'];
+var bands = ['B5','B4','B3'];
 var training = image.select(bands).sampleRegions({
   collection: trainingFC,
   properties: ['landcover'],
   scale: 30
 });
 
-print(training);
-
 //Classifier Training
 var classifier = ee.Classifier.cart().train({
   features: training,
-  classProperty: 'landcover',
+  classProperty: 'landcover', 
   inputProperties: bands
+  
 });
+
+//Run classification 
+var classified = image.select(bands).classify(classifier);
+
+//Displaying results
+Map.centerObject(roi, 11);
+
+//70FF00 (green) not fallowed, FF2D000 (red) fallowed
+Map.addLayer(classified, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']}, 
+'classification');
+
+var trainingAcc = classifier.confusionMatrix();
+var explain = ee.Classifier.explain(classifier);
+print(trainingAcc);
