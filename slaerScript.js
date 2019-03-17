@@ -10,14 +10,16 @@ var nonUrban = table.filter(ee.Filter.neq("Crop2014", "Urban"));
 //Landsat with just NDVI band
 var NDVICollection =  ee.ImageCollection("LANDSAT/LC08/C01/T1_8DAY_NDVI");
 var timeInterest = ee.List.sequence(2013,2018);
+var tempDatset = NDVICollection.filterDate('2018-7-01', '2018-7-10');
 
 var yearlyNDVICollection =  timeInterest.map(function(i){
   i = ee.Number(i);
   var date = ee.Date.fromYMD(i,7,1);
   return NDVICollection.filterDate(date, date.advance(1,'month'));
 });
+//0  = 2013 1 = 2014... (year = 2013 + value)
+var year = 5;
 
-print(yearlyNDVICollection);
 
 var ndviParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
 
@@ -30,9 +32,16 @@ var NDVILapse = timeLapse.map(calcNDVI);
 
 
 var checkFallow = function(feature){
-  
-    var plotNDVI = NDVICollection.filterBounds(feature.geometry());
-    plotNDVI = ee.Number(plotNDVI.mean());
+    var convertYearly = ee.ImageCollection(yearlyNDVICollection.get(year));
+    var plotNDVI = convertYearly.filterBounds(feature.geometry());
+    plotNDVI = plotNDVI.mean();
+    var meanDict = plotNDVI.reduceRegion({
+      reducer: ee.Reducer.mean(),
+      geometry: feature.geometry(),
+      scale: 1
+    });
+    plotNDVI = ee.Number(meanDict.get("NDVI"));
+      
     return ee.Algorithms.If(plotNDVI.lt(0.35), feature.set({isFallowed: true}), feature.set({isFallowed: false}))
 };
 
@@ -49,7 +58,7 @@ function vizCrop(){ //visualizing crops by shading the area with a color
 }
 
 function agLand(){ //focusing on 
-  Map.addLayer(NDVICollection, ndviParams, "Images from 2017");
+  Map.addLayer(ee.ImageCollection(yearlyNDVICollection.get(year)), ndviParams, "Images from 2017");
   Map.addLayer(fallowFeatureColection,colors, "Crop2014", true, .5);
   //Map.setCenter(-120.98891 , 37.6617049, 10);
   Map.setCenter(-121.51825258634209, 41.99345475520686, 15);
@@ -83,7 +92,7 @@ Map.onClick(function(coords) {
     vAxis: {title: 'NDVI', maxValue: 1},
     hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
   });
-  panel.widgets().set(2, ndviChart);
+  panel.widgets().set(1, ndviChart);
   
   ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(1), point, ee.Reducer.mean(), 250);
   ndviChart.setOptions({
@@ -91,37 +100,39 @@ Map.onClick(function(coords) {
     vAxis: {title: 'NDVI', maxValue: 1},
     hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
   });
-  panel.widgets().set(3, ndviChart);
+  panel.widgets().set(2, ndviChart);
+  
   ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(2), point, ee.Reducer.mean(), 250);
   ndviChart.setOptions({
     title: 'NDVI 2015',
     vAxis: {title: 'NDVI', maxValue: 1},
     hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
   });
-  panel.widgets().set(4, ndviChart);
+  panel.widgets().set(3, ndviChart);
+  
   ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(3), point, ee.Reducer.mean(), 250);
   ndviChart.setOptions({
     title: 'NDVI 2016',
     vAxis: {title: 'NDVI', maxValue: 1},
     hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
   });
-  panel.widgets().set(5, ndviChart);
-
-    ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(4), point, ee.Reducer.mean(), 250);
+  panel.widgets().set(4, ndviChart);
+  
+  ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(4), point, ee.Reducer.mean(), 250);
   ndviChart.setOptions({
     title: 'NDVI 2017',
     vAxis: {title: 'NDVI', maxValue: 1},
     hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
   });
-  panel.widgets().set(6, ndviChart);
+  panel.widgets().set(5, ndviChart);
   
-    ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(5), point, ee.Reducer.mean(), 250);
+  ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(5), point, ee.Reducer.mean(), 250);
   ndviChart.setOptions({
     title: 'NDVI 2018',
     vAxis: {title: 'NDVI', maxValue: 1},
     hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
   });
-  panel.widgets().set(7, ndviChart);
+  panel.widgets().set(6, ndviChart);
 });
 
 Map.style().set('cursor', 'crosshair');
