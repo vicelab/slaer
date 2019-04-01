@@ -17,8 +17,9 @@ var yearlyNDVICollection =  timeInterest.map(function(i){
   var date = ee.Date.fromYMD(i,7,1);
   return NDVICollection.filterDate(date, date.advance(1,'month'));
 });
+
 //0  = 2013 1 = 2014... (year = 2013 + value)
-var year = 5;
+var year = 0;
 
 
 var ndviParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
@@ -27,6 +28,9 @@ var calcNDVI = function(image){
   var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
   return image.addBands(ndvi);
 }
+
+var fallowedArray = [];
+
 
 var NDVILapse = timeLapse.map(calcNDVI);
 
@@ -42,10 +46,49 @@ var checkFallow = function(feature){
     });
     plotNDVI = ee.Number(meanDict.get("NDVI"));
       
-    return ee.Algorithms.If(plotNDVI.lt(0.35), feature.set({isFallowed: true}), feature.set({isFallowed: false}))
+    return ee.Algorithms.If(plotNDVI.lt(0.36), feature.set({isFallowed: true}), feature.set({isFallowed: false}))
 };
 
-var fallowFeatureColection = ee.FeatureCollection(nonUrban.map(checkFallow));
+var fallowFeatureColection13 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 1;
+var fallowFeatureColection14 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 2;
+var fallowFeatureColection15 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 3;
+var fallowFeatureColection16 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 4;
+var fallowFeatureColection17 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 5;
+var fallowFeatureColection18 = ee.FeatureCollection(nonUrban.map(checkFallow));
+
+function populateFallowedArray(point){
+  var featureTest = fallowFeatureColection13.filterBounds(point).first();
+  var value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+  featureTest = fallowFeatureColection14.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+  featureTest = fallowFeatureColection15.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+  featureTest = fallowFeatureColection16.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+  featureTest = fallowFeatureColection17.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+  featureTest = fallowFeatureColection18.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  print(fallowedArray);
+  
+  fallowedArray = ee.List(fallowedArray);
+}
 
 var colors = {
   
@@ -59,7 +102,7 @@ function vizCrop(){ //visualizing crops by shading the area with a color
 
 function agLand(){ //focusing on 
   Map.addLayer(ee.ImageCollection(yearlyNDVICollection.get(year)), ndviParams, "Images from 2017");
-  Map.addLayer(fallowFeatureColection,colors, "Crop2014", true, .5);
+  Map.addLayer(fallowFeatureColection13,colors, "Crop2014", true, .5);
   //Map.setCenter(-120.98891 , 37.6617049, 10);
   Map.setCenter(-121.51825258634209, 41.99345475520686, 15);
 }
@@ -86,15 +129,18 @@ Map.onClick(function(coords) {
   lat.setValue('lat: ' + coords.lat.toFixed(2));
   var point = ee.Geometry.Point(coords.lon, coords.lat);
 
-  var ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(0), point, ee.Reducer.mean(), 250);
-  ndviChart.setOptions({
-    title: 'NDVI 2013',
-    vAxis: {title: 'NDVI', maxValue: 1},
-    hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
-  });
-  panel.widgets().set(1, ndviChart);
+  // var ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(0), point, ee.Reducer.mean(), 250);
+  // ndviChart.setOptions({
+  //   title: 'NDVI 2013',
+  //   vAxis: {title: 'NDVI', maxValue: 1},
+  //   hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
+  // });
+  // panel.widgets().set(1, ndviChart);
   
-  ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(1), point, ee.Reducer.mean(), 250);
+  fallowedArray = [];
+  populateFallowedArray(point);
+  
+  var ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(1), point, ee.Reducer.mean(), 250);
   ndviChart.setOptions({
     title: 'NDVI 2014',
     vAxis: {title: 'NDVI', maxValue: 1},
@@ -133,6 +179,15 @@ Map.onClick(function(coords) {
     hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
   });
   panel.widgets().set(6, ndviChart);
+  
+  var fallowedChart = ui.Chart.array.values(fallowedArray, 0);
+  fallowedChart.setOptions({
+    title: 'Fallowed Time Series',
+    vAxis: {title: 'isFallowed', maxValue: 1},
+    hAxis: {title: 'year', gridlines: {count: 7}},
+  });
+  print(fallowedChart.getOptions());
+  panel.widgets().set(1, fallowedChart);
 });
 
 Map.style().set('cursor', 'crosshair');
