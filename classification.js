@@ -1,5 +1,7 @@
 Map.setCenter(-119.44,35.65);
 
+var bands = ['B5','B4', 'B3'];
+
 //Filter
 var image = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
   .filterBounds(roi)
@@ -7,14 +9,15 @@ var image = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
   .sort('CLOUD_COVER')
   .first());
   
+var rocImage = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  
 Map.addLayer(all_fallow);
-Map.addLayer(image, {bands: ['B5', 'B4', 'B3']}, 'Landsat');
+Map.addLayer(image, bands, 'Landsat');
 
 //Merging imports of sample regions into one feature collection 
 var trainingFC = fallowed.merge(not_fallowed);
 
 //Training data
-var bands = ['B5','B4','B3'];
 var training = image.select(bands).sampleRegions({
   collection: trainingFC,
   properties: ['landcover'],
@@ -38,16 +41,16 @@ Map.centerObject(roi, 11);
 //70FF00 (green) not fallowed, FF2D000 (red) fallowed
 Map.addLayer(classified, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']}, 
 'classification');
-
-// //100% acc expected due to confusionMatrix being applied to the same data so we need to validata via external data 
-// print('RF, error matrix: ', classifier.confusionMatrix());
-// print('RF accuracy: ', classifier.confusionMatrix().accuracy());
-
+s
 var withRandom = training.randomColumn('random');
+//print("Checking Random", withRandom);
 
-var split = 0.5;  // Roughly 70% training, 30% testing.
+var split = 0.7;  // Roughly 70% training, 30% testing.
+
 var trainingPartition = withRandom.filter(ee.Filter.lt('random', split));
+//print("Training Partition", trainingPartition);
 var testingPartition = withRandom.filter(ee.Filter.gte('random', split));
+//print("Testing Partition", testingPartition);
 
 var trainedClassifier = ee.Classifier.cart().train({
   features: trainingPartition,
@@ -57,16 +60,29 @@ var trainedClassifier = ee.Classifier.cart().train({
 
 var test = testingPartition.classify(trainedClassifier);
 
+//Confusion Matrix
 var confusionMatrix = test.errorMatrix('landcover', 'classification');
 print('Testing error matrix', confusionMatrix);
 print('Testing accuraccy', confusionMatrix.accuracy());
 
+//Cohen's Kappa
+print("Kappa Statistic", confusionMatrix.kappa());
+
+print("Explain", trainedClassifier.explain());
+
+//print("Classifier Probability", trainedClassifier.setOutputMode('PROBABILITY'));
+
+
 //ROC Curve 
+var fallowedROC = rocImage.reduceRegions(fallowed,ee.Reducer.max().setOutputs(['ndvi']),30).map(function(x){return x.set('is_target',1);})
+print("fallowedROC", fallowedROC);
+var not_fallowedROC = rocImage.reduceRegions(not_fallowed,ee.Reducer.max().setOutputs(['ndvi']),30).map(function(x){return x.set('is_target',0);})
+print("not_fallowedROC", not_fallowedROC);
+var combined = fallowedROC.merge(not_fallowedROC)
+print("combined", combined);
 
-fallowed = classified.reduceRegions(fallowed,ee.Reducer.max().setOutputs(['ndvi']),30).map(function(x){return x.set('is_target',1);})
-not_fallowed = classified.reduceRegions(not_fallowed,ee.Reducer.max().setOutputs(['ndvi']),30).map(function(x){return x.set('is_target',0);})
-var combined = fallowed.merge(not_fallowed)
-
+print(fallowedROC.aggregate_array('ndvi'),'Fallowed NDVI')
+print(not_fallowedROC.aggregate_array('ndvi'),'Not_Fallowed NDVI')
 
 var ROC_field = 'ndvi', ROC_min = 0, ROC_max = 1, ROC_steps = 1000, ROC_points = combined
 
@@ -85,7 +101,9 @@ var X = ee.Array(ROC.aggregate_array('FPR')),
     Xk_m_Xkm1 = X.slice(0,1).subtract(X.slice(0,0,-1)),
     Yk_p_Ykm1 = Y.slice(0,1).add(Y.slice(0,0,-1)),
     AUC = Xk_m_Xkm1.multiply(Yk_p_Ykm1).multiply(0.5).reduce('sum',[0]).abs().toList().get(0)
+    
 print(AUC,'Area under curve')
+
 // Plot the ROC curve
 print(ui.Chart.feature.byFeature(ROC, 'FPR', 'TPR').setOptions({
       title: 'ROC curve',
