@@ -8,8 +8,8 @@ var timeLapse = dataset.select(['B5', 'B4', 'B3']);
 var nonUrban = table.filter(ee.Filter.neq("Crop2014", "Urban"));
 
 //Landsat with just NDVI band
-var NDVICollection =  ee.ImageCollection("LANDSAT/LC08/C01/T1_8DAY_NDVI");
-var timeInterest = ee.List.sequence(2013,2018);
+var NDVICollection =  ee.ImageCollection("LANDSAT/LE07/C01/T1_8DAY_NDVI");
+var timeInterest = ee.List.sequence(1999,2018);
 var tempDatset = NDVICollection.filterDate('2018-7-01', '2018-7-10');
 
 var yearlyNDVICollection =  timeInterest.map(function(i){
@@ -20,7 +20,6 @@ var yearlyNDVICollection =  timeInterest.map(function(i){
 
 //0  = 2013 1 = 2014... (year = 2013 + value)
 var year = 0;
-
 
 var ndviParams = {min: -1, max: 1, palette: ['blue', 'white', 'green']};
 
@@ -49,43 +48,126 @@ var checkFallow = function(feature){
     return ee.Algorithms.If(plotNDVI.lt(0.36), feature.set({isFallowed: true}), feature.set({isFallowed: false}))
 };
 
-var fallowFeatureColection13 = ee.FeatureCollection(nonUrban.map(checkFallow));
+var fallowFeatureColection99 = ee.FeatureCollection(nonUrban.map(checkFallow));
 year = 1;
-var fallowFeatureColection14 = ee.FeatureCollection(nonUrban.map(checkFallow));
+var fallowFeatureColection00 = ee.FeatureCollection(nonUrban.map(checkFallow));
 year = 2;
-var fallowFeatureColection15 = ee.FeatureCollection(nonUrban.map(checkFallow));
+var fallowFeatureColection01 = ee.FeatureCollection(nonUrban.map(checkFallow));
 year = 3;
-var fallowFeatureColection16 = ee.FeatureCollection(nonUrban.map(checkFallow));
+var fallowFeatureColection02 = ee.FeatureCollection(nonUrban.map(checkFallow));
 year = 4;
-var fallowFeatureColection17 = ee.FeatureCollection(nonUrban.map(checkFallow));
+var fallowFeatureColection03 = ee.FeatureCollection(nonUrban.map(checkFallow));
 year = 5;
+var fallowFeatureColection04 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 6
+var fallowFeatureColection05 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 7;
+var fallowFeatureColection06 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 8;
+var fallowFeatureColection07 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 9;
+var fallowFeatureColection08 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 10;
+var fallowFeatureColection09 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 11;
+var fallowFeatureColection10 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 12;
+var fallowFeatureColection11 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 13;
+var fallowFeatureColection12 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 14;
+var fallowFeatureColection13 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 15;
+var fallowFeatureColection14 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 16;
+var fallowFeatureColection15 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 17;
+var fallowFeatureColection16 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 18;
+var fallowFeatureColection17 = ee.FeatureCollection(nonUrban.map(checkFallow));
+year = 19;
 var fallowFeatureColection18 = ee.FeatureCollection(nonUrban.map(checkFallow));
 
 function populateFallowedArray(point){
-  var featureTest = fallowFeatureColection13.filterBounds(point).first();
+  var featureTest = fallowFeatureColection99.filterBounds(point).first();
   var value = featureTest.get("isFallowed");
   fallowedArray.push(value);
   
-  featureTest = fallowFeatureColection14.filterBounds(point).first();
+  featureTest = fallowFeatureColection00.filterBounds(point).first();
   value = featureTest.get("isFallowed");
   fallowedArray.push(value);
   
-  featureTest = fallowFeatureColection15.filterBounds(point).first();
+  featureTest = fallowFeatureColection01.filterBounds(point).first();
   value = featureTest.get("isFallowed");
   fallowedArray.push(value);
   
-  featureTest = fallowFeatureColection16.filterBounds(point).first();
+  featureTest = fallowFeatureColection02.filterBounds(point).first();
   value = featureTest.get("isFallowed");
   fallowedArray.push(value);
   
-  featureTest = fallowFeatureColection17.filterBounds(point).first();
+  featureTest = fallowFeatureColection03.filterBounds(point).first();
   value = featureTest.get("isFallowed");
   fallowedArray.push(value);
   
-  featureTest = fallowFeatureColection18.filterBounds(point).first();
+  featureTest = fallowFeatureColection04.filterBounds(point).first();
   value = featureTest.get("isFallowed");
   fallowedArray.push(value);
-  print(fallowedArray);
+  
+  featureTest = fallowFeatureColection05.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+  featureTest = fallowFeatureColection06.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+  featureTest = fallowFeatureColection07.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection08.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection09.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection10.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection11.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection12.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection13.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection14.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+    featureTest = fallowFeatureColection15.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+      featureTest = fallowFeatureColection16.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+      featureTest = fallowFeatureColection17.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
+  
+      featureTest = fallowFeatureColection18.filterBounds(point).first();
+  value = featureTest.get("isFallowed");
+  fallowedArray.push(value);
   
   fallowedArray = ee.List(fallowedArray);
 }
@@ -102,7 +184,7 @@ function vizCrop(){ //visualizing crops by shading the area with a color
 
 function agLand(){ //focusing on 
   Map.addLayer(ee.ImageCollection(yearlyNDVICollection.get(year)), ndviParams, "Images from 2017");
-  Map.addLayer(fallowFeatureColection13,colors, "Crop2014", true, .5);
+  Map.addLayer(fallowFeatureColection07,colors, "Crop2014", true, .5);
   //Map.setCenter(-120.98891 , 37.6617049, 10);
   Map.setCenter(-121.51825258634209, 41.99345475520686, 15);
 }
@@ -129,56 +211,8 @@ Map.onClick(function(coords) {
   lat.setValue('lat: ' + coords.lat.toFixed(2));
   var point = ee.Geometry.Point(coords.lon, coords.lat);
 
-  // var ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(0), point, ee.Reducer.mean(), 250);
-  // ndviChart.setOptions({
-  //   title: 'NDVI 2013',
-  //   vAxis: {title: 'NDVI', maxValue: 1},
-  //   hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
-  // });
-  // panel.widgets().set(1, ndviChart);
-  
   fallowedArray = [];
   populateFallowedArray(point);
-  
-  var ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(1), point, ee.Reducer.mean(), 250);
-  ndviChart.setOptions({
-    title: 'NDVI 2014',
-    vAxis: {title: 'NDVI', maxValue: 1},
-    hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
-  });
-  panel.widgets().set(2, ndviChart);
-  
-  ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(2), point, ee.Reducer.mean(), 250);
-  ndviChart.setOptions({
-    title: 'NDVI 2015',
-    vAxis: {title: 'NDVI', maxValue: 1},
-    hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
-  });
-  panel.widgets().set(3, ndviChart);
-  
-  ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(3), point, ee.Reducer.mean(), 250);
-  ndviChart.setOptions({
-    title: 'NDVI 2016',
-    vAxis: {title: 'NDVI', maxValue: 1},
-    hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
-  });
-  panel.widgets().set(4, ndviChart);
-  
-  ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(4), point, ee.Reducer.mean(), 250);
-  ndviChart.setOptions({
-    title: 'NDVI 2017',
-    vAxis: {title: 'NDVI', maxValue: 1},
-    hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
-  });
-  panel.widgets().set(5, ndviChart);
-  
-  ndviChart = ui.Chart.image.series(yearlyNDVICollection.get(5), point, ee.Reducer.mean(), 250);
-  ndviChart.setOptions({
-    title: 'NDVI 2018',
-    vAxis: {title: 'NDVI', maxValue: 1},
-    hAxis: {title: 'date', format: 'MM-yy', gridlines: {count: 7}},
-  });
-  panel.widgets().set(6, ndviChart);
   
   var fallowedChart = ui.Chart.array.values(fallowedArray, 0);
   fallowedChart.setOptions({
@@ -186,7 +220,6 @@ Map.onClick(function(coords) {
     vAxis: {title: 'isFallowed', maxValue: 1},
     hAxis: {title: 'year', gridlines: {count: 7}},
   });
-  print(fallowedChart.getOptions());
   panel.widgets().set(1, fallowedChart);
 });
 
