@@ -46,7 +46,7 @@ plt.xlabel('Mean Average NDVI (July-August)')
 plt.ylabel('Number of Plots, 1% Binning')
 plt.title('Kern County Fallowed Land Histogram')
 plt.axis([0, 1, 0, 8000])
-plt.savefig('Kern County 1999-2018 Fallowed Land Histogram', dpi=500) #300
+plt.savefig('Kern County 1999-2018 Fallowed Land Histogram', dpi=300) #300
 plt.clf()
 plt.cla()
 plt.close('all')
