@@ -11,7 +11,7 @@ num_fallowed = 0
 num_not_fallowed = 0
 num_acres = 0
 
-with open('Kern1999-2018.csv') as csv_file:
+with open('KernNDWI1999-2018.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
@@ -37,16 +37,16 @@ with open('Kern1999-2018.csv') as csv_file:
 
 print("graphing!!")
 
-bins = np.linspace(0, 1, 100)
+bins = np.linspace(-1, 1, 200)
 plt.hist(data, bins, alpha=0.9)
 
-plt.axvline(x=0.255, ymin=0, ymax = 1, linewidth=1, color='red')
+plt.axvline(x=-.075, ymin=0, ymax = 1, linewidth=1, color='red')
 
-plt.xlabel('Mean Average NDVI (July-August)')
+plt.xlabel('Mean Average NDWI (July-August)')
 plt.ylabel('Number of Plots, 1% Binning')
-plt.title('Kern County Fallowed Land Histogram')
-plt.axis([0, 1, 0, 8000])
-plt.savefig('Kern County 1999-2018 Fallowed Land Histogram', dpi=300) #300
+plt.title('Kern County NDWI Histogram')
+plt.axis([-.5, .75, 0, 8000])
+plt.savefig('Kern County 1999-2018 NDWI Histogram', dpi=300) #300
 plt.clf()
 plt.cla()
 plt.close('all')
