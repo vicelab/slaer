@@ -17,7 +17,7 @@ for index in range(4, 24):
     num_acres_not_dry = 0
     num_acres = 0
     num_plots = -1
-    with open('KernNDWI1999-2018.csv') as csv_file:
+    with open('KernWinter.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             num_plots += 1
@@ -30,7 +30,7 @@ for index in range(4, 24):
                 else:
                     data.append(num)
                     num_acres += float(row[1])
-                    if num > -.075:
+                    if num > .155:
                         num_plots_not_dry += 1
                         num_acres_not_dry += num_acres
                     else:
@@ -46,17 +46,17 @@ for index in range(4, 24):
         percent_plots_dry.append(
             num_plots_dry / (num_plots_dry + num_plots_not_dry))
 
-        bins = np.linspace(-1, 1, 200)
-        plt.hist(data, bins, alpha=0.9)
-        plt.axvline(x=-.075, ymin=0, ymax=1, linewidth=1, color='red')
-        plt.xlabel('Mean Average NDWI (July-August)')
-        plt.ylabel('Number of Plots, 1% Binning')
-        plt.title(f'Kern County { 1999 + index - 4 } NDWI')
-        # plt.axis([0, 1, 0, 1000])
-        plt.savefig(f'Kern County { 1999 + index - 4 } NDWI', dpi=300)  # 300
-        plt.clf()
-        plt.cla()
-        plt.close('all')
+        # bins = np.linspace(-1, 1, 200)
+        # plt.hist(data, bins, alpha=0.9)
+        # plt.axvline(x=.155, ymin=0, ymax=1, linewidth=1, color='red')
+        # plt.xlabel('Mean Average NDVI (December-January)')
+        # plt.ylabel('Number of Plots, 1% Binning')
+        # plt.title(f'Kern County { 1999 + index - 4 } Winter NDVI')
+        # # plt.axis([0, 1, 0, 1000])
+        # plt.savefig(f'Kern County { 1999 + index - 4 } Winter NDVI', dpi=300)  # 300
+        # plt.clf()
+        # plt.cla()
+        # plt.close('all')
 
 plt.plot(percent_acres_dry, label = 'Acres')
 plt.plot(percent_plots_dry, label = 'Plots')
@@ -65,10 +65,10 @@ plt.legend()
 plt.xticks(np.arange(20), ('99', '00', '01', '02', '03', '04', '05', '06', '07',
                       '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18'))
 plt.xlabel('Year')
-plt.ylabel('Percent "Dry" [NDWI < -.075]')
-plt.title(f'Kern County 1999-2018 NDWI')
+plt.ylabel('Percent Fallowed')
+plt.title(f'Kern County 1999-2018 Winter NDVI')
 # plt.axis([0, 1, 0, 1000])
-plt.savefig(f'Kern County 1999-2018 NDWI', dpi=300)  # 300
+plt.savefig(f'Kern County 1999-2018 Winter NDVI', dpi=300)  # 300
 plt.clf()
 plt.cla()
 plt.close('all')
