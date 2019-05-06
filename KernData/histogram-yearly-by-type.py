@@ -10,6 +10,9 @@ percent_acres_fallowed = []
 
 
 types_percent_fallowed = {"Alfalfa and Alfalfa Mixtures": [], "Avocados":[], "Almonds": [], "Beans (Dry)": [], "Apples": [], "Bush Berries": [], "Carrots": [], "Cherries": [], "Citrus": [], "Cole Crops": [], "Corn, Sorghum and Sudan": [], "Cotton" : [],"Flowers, Nursery and Christmas Tree Farms":[],  "Grapes":[], "Idle":[],  "Lettuce/Leafy Greens":[], "Managed Wetland":[], "Melons, Squash and Cucumbers":[], "Miscellaneous Truck Crops":[],"Miscellaneous Grain and Hay": [], "Miscellaneous Deciduous":[], "Miscellaneous Field Crops": [],"Miscellaneous Grasses": [],"Miscellaneous Subtropical Fruits":[],  "Mixed Pasture":[], "Pears":[], "Safflower":[],"Strawberries": [], "Olives":[],  "Onions and Garlic": [], "Peaches/Nectarines":[], "Peppers":[], "Pistachios":[], "Plums, Prunes and Apricots":[], "Pomegranates":[], "Potatoes and Sweet Potatoes": [], "Tomatoes": [], "Wheat": [], "Walnuts": [], "Young Perennials": [], "Kiwis" :[] }
+# types_percent_fallowed = {"Alfalfa and Alfalfa Mixtures": [], "Avocados":[], "Almonds": [], "Beans (Dry)": [], "Apples": [], "Bush Berries": [], "Carrots": [], "Cherries": [], "Citrus": [], "Cole Crops": [], "Corn, Sorghum and Sudan": [], "Cotton" : [],"Flowers, Nursery and Christmas Tree Farms":[],  "Grapes":[], "Idle":[],  "Lettuce/Leafy Greens":[], "Managed Wetland":[], "Melons, Squash and Cucumbers":[], "Miscellaneous Truck Crops":[],"Miscellaneous Grain and Hay": [], "Miscellaneous Deciduous":[], "Miscellaneous Field Crops": [],"Miscellaneous Grasses": [],"Miscellaneous Subtropical Fruits":[],  "Mixed Pasture":[], "Pears":[], "Safflower":[],"Strawberries": [], "Olives":[],  "Onions and Garlic": [], "Peaches/Nectarines":[], "Peppers":[], "Pistachios":[], "Plums, Prunes and Apricots":[], "Pomegranates":[], "Potatoes and Sweet Potatoes": [], "Tomatoes": [], "Wheat": [], "Walnuts": [], "Young Perennials": [], "Kiwis" :[] }
+
+
 data_type = {"Alfalfa and Alfalfa Mixtures": [], "Avocados":[], "Almonds": [], "Beans (Dry)": [], "Apples": [], "Bush Berries": [], "Carrots": [], "Cherries": [], "Citrus": [], "Cole Crops": [], "Corn, Sorghum and Sudan": [], "Cotton" : [],"Flowers, Nursery and Christmas Tree Farms":[],  "Grapes":[], "Idle":[],  "Lettuce/Leafy Greens":[], "Managed Wetland":[], "Melons, Squash and Cucumbers":[], "Miscellaneous Truck Crops":[],"Miscellaneous Grain and Hay": [], "Miscellaneous Deciduous":[], "Miscellaneous Field Crops": [],"Miscellaneous Grasses": [],"Miscellaneous Subtropical Fruits":[],  "Mixed Pasture":[], "Pears":[], "Safflower":[],"Strawberries": [], "Olives":[],  "Onions and Garlic": [], "Peaches/Nectarines":[], "Peppers":[], "Pistachios":[], "Plums, Prunes and Apricots":[], "Pomegranates":[], "Potatoes and Sweet Potatoes": [], "Tomatoes": [], "Wheat": [], "Walnuts": [], "Young Perennials": [], "Kiwis" :[] }
 summer_data_type = {"Alfalfa and Alfalfa Mixtures": [], "Avocados":[], "Almonds": [], "Beans (Dry)": [], "Apples": [], "Bush Berries": [], "Carrots": [], "Cherries": [], "Citrus": [], "Cole Crops": [], "Corn, Sorghum and Sudan": [], "Cotton" : [],"Flowers, Nursery and Christmas Tree Farms":[],  "Grapes":[], "Idle":[],  "Lettuce/Leafy Greens":[], "Managed Wetland":[], "Melons, Squash and Cucumbers":[], "Miscellaneous Truck Crops":[],"Miscellaneous Grain and Hay": [], "Miscellaneous Deciduous":[], "Miscellaneous Field Crops": [],"Miscellaneous Grasses": [],"Miscellaneous Subtropical Fruits":[],  "Mixed Pasture":[], "Pears":[], "Safflower":[],"Strawberries": [], "Olives":[],  "Onions and Garlic": [], "Peaches/Nectarines":[], "Peppers":[], "Pistachios":[], "Plums, Prunes and Apricots":[], "Pomegranates":[], "Potatoes and Sweet Potatoes": [], "Tomatoes": [], "Wheat": [], "Walnuts": [], "Young Perennials": [], "Kiwis" :[] }
 winter_data_type = {"Alfalfa and Alfalfa Mixtures": [], "Avocados":[], "Almonds": [], "Beans (Dry)": [], "Apples": [], "Bush Berries": [], "Carrots": [], "Cherries": [], "Citrus": [], "Cole Crops": [], "Corn, Sorghum and Sudan": [], "Cotton" : [],"Flowers, Nursery and Christmas Tree Farms":[],  "Grapes":[], "Idle":[],  "Lettuce/Leafy Greens":[], "Managed Wetland":[], "Melons, Squash and Cucumbers":[], "Miscellaneous Truck Crops":[],"Miscellaneous Grain and Hay": [], "Miscellaneous Deciduous":[], "Miscellaneous Field Crops": [],"Miscellaneous Grasses": [],"Miscellaneous Subtropical Fruits":[],  "Mixed Pasture":[], "Pears":[], "Safflower":[],"Strawberries": [], "Olives":[],  "Onions and Garlic": [], "Peaches/Nectarines":[], "Peppers":[], "Pistachios":[], "Plums, Prunes and Apricots":[], "Pomegranates":[], "Potatoes and Sweet Potatoes": [], "Tomatoes": [], "Wheat": [], "Walnuts": [], "Young Perennials": [], "Kiwis" :[] }
@@ -84,61 +87,64 @@ for index in range(4, 39 + 4):
             # plt.close('all')
 
 
-for key in types_fallowed:
-    plt.plot (types_percent_fallowed[key], label = key)
-    plt.legend()
-    plt.xticks(np.arange(39), ('99', '', '00', '',  '01', '', '02', '', '03', '', '04', '', '05', '', '06', '', '07', '',
-                        '08', '', '09', '', '10', '', '11', '', '12', '', '13', '', '14', '', '15', '', '16', '', '17', '', '18' ))
-    plt.xlabel('Year')
-    plt.ylabel('Percent Fallowed')
-    plt.title(f'Kern County 1999-2018 {key} NDVI')
-    key_alt = key.replace("/", " ")
-    # plt.axis([0, 1, 0, 1000])
-    plt.savefig(f'Kern County 1999-2018 {key_alt} NDVI', dpi=300)  # 300
-    plt.clf()
-    plt.cla()
-    plt.close('all')
+# for key in types_fallowed:
+#     plt.plot (types_percent_fallowed[key], label = key)
+#     plt.legend()
+#     plt.xticks(np.arange(39), ('99', '', '00', '',  '01', '', '02', '', '03', '', '04', '', '05', '', '06', '', '07', '',
+#                         '08', '', '09', '', '10', '', '11', '', '12', '', '13', '', '14', '', '15', '', '16', '', '17', '', '18' ))
+#     plt.xlabel('Year')
+#     plt.ylabel('Percent Fallowed')
+#     plt.title(f'Kern County 1999-2018 {key} NDVI')
+#     key_alt = key.replace("/", " ")
+#     # plt.axis([0, 1, 0, 1000])
+#     plt.savefig(f'Kern County 1999-2018 {key_alt} NDVI', dpi=300)  # 300
+#     plt.clf()
+#     plt.cla()
+#     plt.close('all')
 
-    #########################################
+#     #########################################
 
-    bins = np.linspace(0, 1, 100)
-    plt.hist(data_type[key], bins, alpha=0.9)
-    plt.axvline(x=0.255, ymin=0, ymax=1, linewidth=1, color='red')
-    plt.xlabel('Mean Average NDVI')
-    plt.ylabel('Number of Plots, 1% Binning')
-    plt.title(f'Kern County {key} NVDI Histogram')
-    # plt.axis([0, 1, 0, 1000])
-    key_alt = key.replace("/", " ")
-    plt.savefig(f'Kern County {key_alt} NVDI Histogram', dpi=300)  # 300
-    plt.clf()
-    plt.cla()
-    plt.close('all')
+#     bins = np.linspace(0, 1, 100)
+#     plt.hist(data_type[key], bins, alpha=0.9)
+#     plt.axvline(x=0.255, ymin=0, ymax=1, linewidth=1, color='red')
+#     plt.xlabel('Mean Average NDVI')
+#     plt.ylabel('Number of Plots, 1% Binning')
+#     plt.title(f'Kern County {key} NVDI Histogram')
+#     # plt.axis([0, 1, 0, 1000])
+#     key_alt = key.replace("/", " ")
+#     plt.savefig(f'Kern County {key_alt} NVDI Histogram', dpi=300)  # 300
+#     plt.clf()
+#     plt.cla()
+#     plt.close('all')
     
-    bins = np.linspace(0, 1, 100)
-    plt.hist(summer_data_type[key], bins, alpha=0.9)
-    plt.axvline(x=0.255, ymin=0, ymax=1, linewidth=1, color='red')
-    plt.xlabel('Mean Average NDVI')
-    plt.ylabel('Number of Plots, 1% Binning')
-    plt.title(f'Kern County {key} Summer NVDI Histogram')
-    # plt.axis([0, 1, 0, 1000])
-    key_alt = key.replace("/", " ")
-    plt.savefig(f'Kern County {key_alt} Summer NVDI Histogram', dpi=300)  # 300
-    plt.clf()
-    plt.cla()
-    plt.close('all')
+#     bins = np.linspace(0, 1, 100)
+#     plt.hist(summer_data_type[key], bins, alpha=0.9)
+#     plt.axvline(x=0.255, ymin=0, ymax=1, linewidth=1, color='red')
+#     plt.xlabel('Mean Average NDVI')
+#     plt.ylabel('Number of Plots, 1% Binning')
+#     plt.title(f'Kern County {key} Summer NVDI Histogram')
+#     # plt.axis([0, 1, 0, 1000])
+#     key_alt = key.replace("/", " ")
+#     plt.savefig(f'Kern County {key_alt} Summer NVDI Histogram', dpi=300)  # 300
+#     plt.clf()
+#     plt.cla()
+#     plt.close('all')
     
-    bins = np.linspace(0, 1, 100)
-    plt.hist(winter_data_type[key], bins, alpha=0.9)
-    plt.axvline(x=0.255, ymin=0, ymax=1, linewidth=1, color='red')
-    plt.xlabel('Mean Average NDVI')
-    plt.ylabel('Number of Plots, 1% Binning')
-    plt.title(f'Kern County {key} Winter NVDI Histogram')
-    # plt.axis([0, 1, 0, 1000])
-    key_alt = key.replace("/", " ")
-    plt.savefig(f'Kern County {key_alt} Winter NVDI Histogram', dpi=300)  # 300
-    plt.clf()
-    plt.cla()
-    plt.close('all')
+#     bins = np.linspace(0, 1, 100)
+#     plt.hist(winter_data_type[key], bins, alpha=0.9)
+#     plt.axvline(x=0.255, ymin=0, ymax=1, linewidth=1, color='red')
+#     plt.xlabel('Mean Average NDVI')
+#     plt.ylabel('Number of Plots, 1% Binning')
+#     plt.title(f'Kern County {key} Winter NVDI Histogram')
+#     # plt.axis([0, 1, 0, 1000])
+#     key_alt = key.replace("/", " ")
+#     plt.savefig(f'Kern County {key_alt} Winter NVDI Histogram', dpi=300)  # 300
+#     plt.clf()
+#     plt.cla()
+#     plt.close('all')
+
+
+
 
 plt.plot (percent_acres_fallowed, label = "total")
 plt.legend()
