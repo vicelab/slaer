@@ -1,7 +1,7 @@
 //Dataset of satellite images from 2013 till real time.
 //Will use times around harvests to ensure the crops get to grow and show color
-var dataset = ee.ImageCollection('LANDSAT/LC08/C01/T1_RT')
-                  .filterDate('2018-7-01', '2018-7-10');
+var dataset = ee.ImageCollection("LANDSAT/LE07/C01/T1")
+                  .filterDate('2014-7-01', '2014-7-10');
 //Selects the color bans NIR - Red - Green
 var timeLapse = dataset.select(['B5', 'B4', 'B3']);
 //Removes the urban + idle land from the map and dataset
