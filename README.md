@@ -23,7 +23,14 @@ Parsing and Visualization of raw mean-average per-plot NVDI values is done with 
 > + Plot types (histograms, line graphs, box charts)
 > + Various styling/formatting options
 
-# The Machile Learning Approach
+# The Machine Learning Approach
 
-...
+Estimation of Fallowed Land with Classification and Regression Trees via Google Earth Engine.
+
+## Data Collection
+
+Sampling geometries from Landsat, importing reported Idle land from Kern County for training data. 
+
+## Data Parsing && Visualization
+
 
