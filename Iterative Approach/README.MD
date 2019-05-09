@@ -1,5 +1,5 @@
-#Slaer Project 
-###Importing and Processing Data
+# Slaer Project 
+### Importing and Processing Data
 Two datasets were used to gather NDVI values per plot.
 
 1. LandIQ from 2014 with metadata of what the plot is growing at that year and polygon outline of the plot
