@@ -54,6 +54,21 @@ for index in range(4, 39 + 4):
                         num_acres_not_fallowed += float(row[1])
                         types_not_fallowed[row[3]] += float(row[1])
                     else:
+                        if row[3] == "Citrus":
+                            count_times = 0
+                            average_ndvi = 0
+                            for index_inner in range(4, 39 + 4):
+                                try:
+                                    num_inner = float(row[index_inner])
+                                except ValueError:
+                                    num += 0
+                                if num_inner < .255:
+                                    count_times += 1
+                                    average_ndvi += num_inner
+                            if count_times > 33:
+                                print (row[0] + ' ' + f'{count_times} Average: { average_ndvi/count_times}')
+                                for index_inner_2 in range(4, 39 + 4):
+                                     print(row[index_inner_2])                         
                         num_plots_fallowed += 1
                         num_acres_fallowed += float(row[1])
                         types_fallowed[row[3]] += float(row[1])
