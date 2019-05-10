@@ -25,7 +25,7 @@ Parsing and Visualization of raw mean-average per-plot NVDI values is done with 
 
 # The Machine Learning Approach
 
-Estimation of Fallowed Land with Classification and Regression Trees via Google Earth Engine.
+Estimation of fallowed land with Classification and Regression Trees via GEE.
 
 ## Data Collection
 
@@ -33,4 +33,4 @@ Sampling geometries from Landsat, importing reported Idle land from Kern County 
 
 ## Data Parsing && Visualization
 
-
+Data is visualized within GEE by assigning contrasting colors to respective classes and adding the classification to the map. 
