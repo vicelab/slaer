@@ -70,11 +70,11 @@ var kernCounty = ee.Geometry.MultiPolygon(
 nonUrban = nonUrban.filterBounds(kernCounty);
 ```
 
-#### Parameters:
+### Parameters:
 
-> Months of Interest
-> Years of Interest
-> Can be a single time period or multiple
+>+ Months of Interest
+>+ Years of Interest
+>+ Can be a single time period or multiple
 
 ```javascript
 var yearsOfInterest = ee.List.sequence(1999,2018);
@@ -102,7 +102,7 @@ The map function iterates through a data structure like a feature collection or 
 
 [Link to Script](https://code.earthengine.google.com/6001c213dd9e0d4f4f29ce27215702ac)
 
-### Gathering Data
+## Gathering Data
 
 Google Earth Engine allows the adding of properties via the set function. Below the mean NDVI value is calculated per plot and set as a property on the plot.
 
