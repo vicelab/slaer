@@ -1,15 +1,19 @@
 # Classification of Fallowed Land 
-Below are the steps necessary to take in order to reproduce results from running Supervised Classification on **Landsat 8 Collection 1 Tier 1 8-Day NDVI Composite** within Google Earth Engine (GEE). A **CART model** is used to make predictions but models such as **SVM** or **RandomForest** are also applicable and can be easily integrated. Training data is collected from pixel geometries of fallowed land reported from Kern County.  
+Below are the steps necessary to take in order to reproduce results from running Supervised Classification on **Landsat 8 Collection 1 Tier 1 8-Day NDVI Composite** and visualizing results within Google Earth Engine (GEE). A **CART model** is used to make predictions but models such as **SVM** or **RandomForest** are also applicable and can be easily integrated. Training data is collected from pixel geometries of fallowed land reported from Kern County.  
   
 # Google Earth Engine
 An [account](https://signup.earthengine.google.com/) is needed to view and use Google Earth Engine.
 
-Full script can be seen [here](https://code.earthengine.google.com/917a28b259e13df92b86e2b0a20f0d79).
+Full script can be seen [here](https://code.earthengine.google.com/27dac6ced898aec8d7ce237c1beac91b).
 
 # Importing Data
-We will begin with importing data within GEE via the Assets tab:
+We will begin with importing data as a table within GEE via the Assets tab:
 
-Follow instructions here: [Importing Table Data](https://developers.google.com/earth-engine/importing)
+LandIQ from 2014: [Link to Dataset]()
+
+Kern County Idle Land from 2014: [Link to Dataset]()
+
+Follow instructions on importing here: [Importing Table Data](https://developers.google.com/earth-engine/importing)
 
 #### Global Imports
 ~~~~javascript
@@ -47,16 +51,18 @@ var landSatTest = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_8DAY_NDVI')
   .sort('CLOUD_COVER') 
   .first()); 
 ~~~~
-We are using the **Landsat 8 Collection 1 Tier 1 8-Day NDVI Composite** as our satellite in order to collect training data and classify regions. We will define **landSatTest** as our region to classify 
+We are using the **Landsat 8 Collection 1 Tier 1 8-Day NDVI Composite** as our satellite in order to collect training data and classify regions. We will define **landSat** as our satellite to collect training data and **landSatTest** as our region to classify.
 
 # Collecting Training Data 
+![toolset](https://i.imgur.com/8cV5wuh.png)
 
-Training data is collected using the [toolset](https://github.com/vicelab/slaer/blob/master/Images/Documentation/toolset.png) and drawing rectangles over areas of interest.
+Training data is collected using the toolset and drawing rectangles over areas of interest.
 
-We will be setting up 2 different classes of geometries: fallowed, not_fallowed. 
+![not_fallowed](https://i.imgur.com/sE3hAlC.png) ![fallowed](https://i.imgur.com/N2fxDgX.png)
 
-See [fallowed](https://github.com/vicelab/slaer/blob/master/Images/Documentation/fallowClass.png) and [not_fallowed](https://github.com/vicelab/slaer/blob/master/Images/Documentation/not_fallowClass.png) for configuring geometry imports. 
-
+We will be setting up 2 different classes of geometries: fallowed
+not_fallowed and as such they should be configured as shown
+above. 
 ~~~~javascript
 //Merging imports of sample regions into one feature collection
 var trainingFC = not_fallowed.merge(fallowed);
@@ -95,7 +101,9 @@ The CART model will then train on the passed data points and then classify our p
 Map.addLayer(classified, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']}, 
 'classification');
 ~~~~
-Adding the classified layer to the map will yield this [image](https://github.com/vicelab/slaer/blob/master/Images/classifiedKern.png) of Kern County. 
+Adding the classified layer to the map will yield this image of Kern County. 
+
+![image](https://i.imgur.com/ZS94aoh.png)  
 
 The regions that are Green are land that is not fallowed and the regions which are Red represent fallowed land in 2014. 
 
