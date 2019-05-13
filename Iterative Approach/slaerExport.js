@@ -23,6 +23,8 @@ print(nonUrban.size()); //Output 359893 feature
 //We will now include Landsat 7 NDVI 8-day dataset.
 var landSatNDVI =  ee.ImageCollection("LANDSAT/LE07/C01/T1_8DAY_NDVI");
 
+//Gets time series data of landSat in one months periods
+//For example: July 1, 2013 - July 31, 2013
 var yearlyCollections  = yearsOfInterest.map(function(i){
     return monthsOfInterst.map(function(j){
       i = ee.Number(i);
@@ -56,14 +58,17 @@ var setNDVI = function(feature){
     return feature.set(foo);
 };
 
+//Creates a new featureCollection with the first mean NDVI value.
 var landIQNDVI = ee.FeatureCollection(nonUrban.map(setNDVI));
 
+//Adds onto landIQNDVI adding each mean NDVI value per interest point.
 for(yearlyCollectionIndex = yearlyCollectionIndex+1; yearlyCollectionIndex < numberOfEntries; yearlyCollectionIndex++){
   landIQNDVI = ee.FeatureCollection(landIQNDVI.map(setNDVI));
 }
 
 print(landIQNDVI.first());
 
+//Exports the data to Google Drive.
 Export.table.toDrive({
   collection: ee.FeatureCollection(landIQNDVI),
   description: exportName,
