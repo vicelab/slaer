@@ -9,9 +9,9 @@ Full script can be seen [here](https://code.earthengine.google.com/27dac6ced898a
 # Importing Data
 We will begin with importing data as a table within GEE via the Assets tab:
 
-LandIQ from 2014: [Link to Dataset]()
+LandIQ from 2014: [Link to Dataset](https://catalog.data.gov/dataset/land-use-2014-land-iq-ds2677)
 
-Kern County Idle Land from 2014: [Link to Dataset]()
+Kern County Idle Land from 2014: [Link to Dataset](http://www.kernag.com/gis/gis-data.asp)
 
 Follow instructions on importing here: [Importing Table Data](https://developers.google.com/earth-engine/importing)
 
