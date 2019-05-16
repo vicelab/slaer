@@ -14,7 +14,7 @@
 
 Three datasets were used to gather NDVI values per plot in a specific county.
 
-1. LandIQ from 2014 with metadata of what the plot is growing at that year and polygon outline of the plot.
+1. LandIQ from 2014 with metadata of what the plot is growing at that year and polygon outline of the plot. [Link to Dataset](https://catalog.data.gov/dataset/land-use-2014-land-iq-ds2677)
 2. Landsat 2017 NDVI has precomputed NDVI values from Landsat images. [Link to Dataset](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_8DAY_NDVI)
 3. GeoJSON with geometries outlining counties. [Link to Dataset](http://eric.clst.org/tech/usgeojson/)
 
@@ -79,7 +79,7 @@ nonUrban = nonUrban.filterBounds(kernCounty);
 ```javascript
 var yearsOfInterest = ee.List.sequence(1999,2018);
 var monthsOfInterest = ee.List.sequence(1,12);
-var monthsOfInterst = ee.List([7,12]);
+var monthsOfInterest = ee.List([7,12]);
 ```
 
 Warning: There are cases where at a point in time there is not a NDVI value for a plot and an error will be thrown.
@@ -98,7 +98,7 @@ var yearlyCollections  = yearsOfInterest.map(function(i){
   });}).flatten();
 ```
 
-The map function iterates through a data structure like a feature collection or a list. Inside the map function computations can be done based on a passed in value (i or j) and return a data structure in this case an filtered image collection.
+The map function iterates through a data structure like a feature collection or a list. Inside the map function computations can be done based on a passed in value (i or j) and return a data structure in this case a filtered image collection.
 
 [Link to Script](https://code.earthengine.google.com/6001c213dd9e0d4f4f29ce27215702ac)
 
