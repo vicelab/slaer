@@ -1,4 +1,4 @@
-# Slaer Project
+# Iterative Approach
 
 ## Software Used
 
@@ -10,13 +10,13 @@
 3. Matplotlib:
     >+ [Library Link](https://matplotlib.org/)
 
-## Importing and Processing Datasets
+## Importing and Processing Datasets and County Geometries
 
 Three datasets were used to gather NDVI values per plot in a specific county.
 
-1. LandIQ from 2014 with metadata of what the plot is growing at that year and polygon outline of the plot. [Link to Dataset](https://catalog.data.gov/dataset/land-use-2014-land-iq-ds2677)
-2. Landsat 2017 NDVI has precomputed NDVI values from Landsat images. [Link to Dataset](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_8DAY_NDVI)
-3. GeoJSON with geometries outlining counties. [Link to Dataset](http://eric.clst.org/tech/usgeojson/)
+1. LandIQ from 2014 with metadata of what the plot is growing at that year and polygon outline of the plot.
+2. Landsat 7 NDVI has precomputed NDVI values from Landsat images. [Link to Dataset](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_8DAY_NDVI)
+3. GeoJSON with geometries outlining counties. [Link to GeoJSON](http://eric.clst.org/tech/usgeojson/)
 
 ```javascript
 var table: Table users/dantran2016/atlas_i15_CropMapping2014;
@@ -98,7 +98,7 @@ var yearlyCollections  = yearsOfInterest.map(function(i){
   });}).flatten();
 ```
 
-The map function iterates through a data structure like a feature collection or a list. Inside the map function computations can be done based on a passed in value (i or j) and return a data structure in this case a filtered image collection.
+The map function iterates through a data structure's elements. Inside the map function computations can be done based on the element's metadata and appends the modified element to a new data structure.
 
 [Link to Script](https://code.earthengine.google.com/6001c213dd9e0d4f4f29ce27215702ac)
 
@@ -193,7 +193,7 @@ landIQNDVI returns a feature collection with mean NDVI values over the times of 
 
 [Link to Script](https://code.earthengine.google.com/e37279574d2e330319191237e04c8672)
 
-### Exporting the Data
+### Exporting Data
 
 The function below exports a feature collection to a cloud server, Google Drive, or Google Earth Engine asset.
 
@@ -205,7 +205,7 @@ Export.table.toDrive({
 });
 ```
 
-To access the export window on Google Earth Engine switch the right panel tab to tasks.
+To access the export window on Google Earth Engine, click the task tab on the right panel.
 
 ![Tasks Tab](https://i.imgur.com/Gf3i1cl.png)
 
@@ -214,6 +214,9 @@ Then click the run button to export the data.
 ![Tasks Tab](https://i.imgur.com/A6hh9kq.png)
 
 [Link to Script](https://code.earthengine.google.com/d9adbabe83d9a11c347449615fbea3f9)
+
+### Limitations of Google Earth Engine
+Exporting NDVI values for Kern county (359,893 plots) at one time point took 1 to 2 hours to export. The export time scales linearly with the number of time plots. For example, 40 time points took 3 days to compute.
 
 ### Visualizing Results
 <!-- TODO: Done Via Python Upload Scripts -->
