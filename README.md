@@ -23,6 +23,8 @@ Parsing and Visualization of raw mean-average per-plot NVDI values is done with 
 > + Plot types (histograms, line graphs, box charts)
 > + Various styling/formatting options
 
+## Future Improvements
+
 # The Machine Learning Approach
 
 Estimation of fallowed land with Classification and Regression Trees via GEE.
@@ -33,4 +35,9 @@ Sampling geometries from Landsat, importing reported Idle land from Kern County 
 
 ## Data Parsing && Visualization
 
-Data is visualized within GEE by assigning contrasting colors to respective classes and adding the classification to the map. 
+Data is visualized within GEE by assigning contrasting colors to respective classes and adding the classification to the map.
+
+## Future Improvements
+
+> + Running classification on the Sentinel 2 satellite to compare Landsat results. 
+> + Exporting model classification results per individual feature and plotting results for visualization.
