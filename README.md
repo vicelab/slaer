@@ -8,12 +8,13 @@ SLAER tackles this problem from two distinct angles: an "iterative" approach and
 
 ## Data Collection
 
-Scraping of data from Landsat, Sentinel, etc. is done in GEE with the slaerExport.js script. 
+Scraping of data from Landsat, Sentinel, etc. is done in GEE with the slaerExport.js script.
 
 ### Parameters (slaerExport.js)
-> + Year Range
-> + Months
-> + Spectral Index (NDVI, NDWI, etc)
+> + Years: 1999 - 2019 Landsat 7
+> + 2013 - 2019 Landsat 8
+> + Months: Jan - December
+> + NDVI (30-meter resolution)
 
 ## Data Parsing && Visualization
 
@@ -24,7 +25,8 @@ Parsing and Visualization of raw mean-average per-plot NVDI values is done with 
 > + Various styling/formatting options
 
 ## Future Improvements
-
+> + Using both Landsat 7/8 and Sentinel 2 to provide more data points
+> + Separating plots based on the reported planted crop. Classify each plot separately  based on the plot crops' planting cycle (e.g, winter, summer, or perennial).
 # The Machine Learning Approach
 
 Estimation of fallowed land with Classification and Regression Trees via GEE.
