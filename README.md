@@ -4,33 +4,34 @@ An investigation into fallowing of land in California's Central Valley utilizing
 
 SLAER tackles this problem from two distinct angles: an "iterative" approach and a "machine learning" approach.
 
-# The Iterative Approach
+## The Iterative Approach
 
-## Data Collection
+### Data Collection
 
 Scraping of data from Landsat, Sentinel, etc. is done in GEE with the slaerExport.js script. 
 
-### Parameters (slaerExport.js)
+#### Parameters (slaerExport.js)
 > + Year Range
 > + Months
 > + Spectral Index (NDVI, NDWI, etc)
 
-## Data Parsing && Visualization
+### Data Parsing && Visualization
 
 Parsing and Visualization of raw mean-average per-plot NVDI values is done with Matplotlib in Python. 
 
-### Parameters (histogram.py, ...)
+#### Parameters (histogram.py, ...)
 > + Plot types (histograms, line graphs, box charts)
 > + Various styling/formatting options
 
-# The Machine Learning Approach
+
+## The Machine Learning Approach
 
 Estimation of fallowed land with Classification and Regression Trees via GEE.
 
-## Data Collection
+### Data Collection
 
 Sampling geometries from Landsat, importing reported Idle land from Kern County for training data. 
 
-## Data Parsing && Visualization
+### Data Parsing && Visualization
 
 Data is visualized within GEE by assigning contrasting colors to respective classes and adding the classification to the map. 
