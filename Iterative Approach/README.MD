@@ -1,4 +1,4 @@
-# Slaer Project
+# Iterative Approach
 
 ## Software Used
 
@@ -8,15 +8,15 @@
 2. Python:
    >+ Python3 can be installed via this [link](https://www.python.org/).
 3. Matplotlib:
-    <!-- Add install instructions or links -->
+    >+ [Library Link](https://matplotlib.org/)
 
-## Importing and Processing Datasets
+## Importing and Processing Datasets and County Geometries
 
 Three datasets were used to gather NDVI values per plot in a specific county.
 
-1. LandIQ from 2014 with metadata of what the plot is growing at that year and polygon outline of the plot. [Link to Dataset]()
-2. Landsat 2017 NDVI has precomputed NDVI values from Landsat images. [Link to Dataset](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_8DAY_NDVI)
-3. GeoJSON with geoemtries outlinng countiess. [Link to Dataset](http://eric.clst.org/tech/usgeojson/)
+1. LandIQ from 2014 with metadata of what the plot is growing at that year and polygon outline of the plot.
+2. Landsat 7 NDVI has precomputed NDVI values from Landsat images. [Link to Dataset](https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C01_T1_8DAY_NDVI)
+3. GeoJSON with geometries outlining counties. [Link to GeoJSON](http://eric.clst.org/tech/usgeojson/)
 
 ```javascript
 var table: Table users/dantran2016/atlas_i15_CropMapping2014;
@@ -60,6 +60,7 @@ We discarded the Urban classified land since our focus is to classify fallowed a
 ```javascript
 var nonUrban = table.filter(ee.Filter.neq("Crop2014","Urban"));
 ```
+
 Further filtering can be done to focus on a county by filtering the LandIQ dataset by the polygon of a county.
 
 ```javascript
@@ -69,17 +70,21 @@ var kernCounty = ee.Geometry.MultiPolygon(
 nonUrban = nonUrban.filterBounds(kernCounty);
 ```
 
-#### Parameters:
+### Parameters:
 
-> Months of Interest
-> Years of Interest
-> Can be a single time period or multiple
+>+ Months of Interest
+>+ Years of Interest
+>+ Can be a single time period or multiple
 
 ```javascript
 var yearsOfInterest = ee.List.sequence(1999,2018);
 var monthsOfInterest = ee.List.sequence(1,12);
-var monthOfInterest = ee.List([1]);
+var monthsOfInterest = ee.List([7,12]);
 ```
+
+Warning: There are cases where at a point in time there is not a NDVI value for a plot and an error will be thrown.
+
+![Image of Error](https://i.imgur.com/8KBfxne.png)
 
 Given the parameters a list of Landsat imageCollections filtered by individual month and year can be generated through the function below.
 
@@ -93,16 +98,24 @@ var yearlyCollections  = yearsOfInterest.map(function(i){
   });}).flatten();
 ```
 
-The map function iterates through a data structure like a feature collection or a list. Inside the map function computations can be done based on a passed in value (i or j) and return a data structure in this case an filtered image collection.
+The map function iterates through a data structure's elements. Inside the map function computations can be done based on the element's metadata and appends the modified element to a new data structure.
 
-[Link to Script](https://code.earthengine.google.com/5a54184e8e3b5de77d395ea486e41c42)
+[Link to Script](https://code.earthengine.google.com/6001c213dd9e0d4f4f29ce27215702ac)
 
-###  Gathering Data
-<!-- TODO: Add descriptions -->
+## Gathering Data
+
+Google Earth Engine allows the adding of properties via the set function. Below the mean NDVI value is calculated per plot and set as a property on the plot.
+
 ```javascript
+var numberOfEntries = yearlyCollections.size();
+var yearlyCollectionIndex = 0;
+
 var checkFallow = function(feature){
-    var convertYearly = ee.ImageCollection(yearlyCollections.get(year));
+    //Selects a filtered Landsat imageCollection
+    var convertYearly = ee.ImageCollection(yearlyCollections.get(yearlyCollectionIndex));
+    //Filters Landsat by the bounds of a feature's (single plot) geometry
     var plotNDVI = convertYearly.filterBounds(feature.geometry());
+    //Computes the mean NDVI value over the entire plot
     plotNDVI = plotNDVI.mean();
     var meanDict = plotNDVI.reduceRegion({
       reducer: ee.Reducer.mean(),
@@ -110,24 +123,100 @@ var checkFallow = function(feature){
       scale: 1,
       bestEffort:true
     });
+    //Extracts the NDVI value from the dictonary return value of meanDict
     plotNDVI = ee.Number(meanDict.get("NDVI"));
-      
+
+    //Constructing a dictonary with the index and the NDVI value to be saved to the feature.
     var foo = {};
-    var monthYear = year.toString();
+    var monthYear = yearlyCollectionIndex.toString();
     foo[monthYear] = plotNDVI;
-    
+
     return feature.set(foo);
 };
 ```
-[Link to Script](https://code.earthengine.google.com/ad3e00e901efa2e463b6ae4a9efce803)
-### Exporting the Data
-<!-- TODO: Add descriptions -->
+
+Using the script below time series NDVI can be stored in feature collection.
+
+```javascript
+var landIQNDVI = ee.FeatureCollection(nonUrban.map(setNDVI));
+
+for(yearlyCollectionIndex = yearlyCollectionIndex+1; yearlyCollectionIndex < numberOfEntries; yearlyCollectionIndex++){
+  landIQNDVI = ee.FeatureCollection(landIQNDVI.map(setNDVI));
+}
+```
+
+landIQNDVI returns a feature collection with mean NDVI values over the times of interest.
+
+```JSON
+"properties": {
+    "0": 0.09877312395773193,
+    "1": 0.06276312808948771,
+    "2": 0.5253586653470814,
+    "3": 0.2979903895553776,
+    "4": 0.28399248585516185,
+    "5": 0.11432357099110248,
+    "6": 0.47526314529567587,
+    "7": 0.34818060441157317,
+    "8": 0.45370712232626437,
+    "9": 0.312030452955916,
+    "10": 0.22345866422510072,
+    "11": 0.08438224407847458,
+    "12": 0.521465526833003,
+    "13": 0.204677961783142,
+    "14": 0.6150093086963376,
+    "15": 0.23447950068881104,
+    "16": 0.5725433139818257,
+    "17": 0.3034091259869929,
+    "18": 0.4643725507406636,
+    "19": 0.4620643699828776,
+    "20": 0.49508907247464856,
+    "21": 0.3243342797228612,
+    "22": 0.520806995871174,
+    "23": 0.5113243309062386,
+    "24": 0.5146000702264357,
+    "25": 0.23753865377151034,
+    "26": 0.6727596679922516,
+    "27": 0.43168228585573964,
+    "28": 0.4618968378861816,
+    "29": 0.29327033538090086,
+    "30": 0.37452569638729827,
+    "31": 0.22109621685776032,
+    "32": 0.27541618087125747,
+    "33": 0.39848670981790774,
+    "34": 0.4741756929825517,
+    "35": 0.4315363232683603,
+    "36": 0.3767581578248459,
+    "37": 0.567144975313284,
+    "38": 0.4721550143541549,
+    "39": 0.281364929728735,
+```
+
+[Link to Script](https://code.earthengine.google.com/e37279574d2e330319191237e04c8672)
+
+### Exporting Data
+
+The function below exports a feature collection to a cloud server, Google Drive, or Google Earth Engine asset.
+
 ```javascript
 Export.table.toDrive({
-  collection: ee.FeatureCollection(fallowedCheck),
-  description: 'LandSat7-Summer-NDVI',
+  collection: ee.FeatureCollection(landIQNDVI),
+  description: 'LandSat7-Bi-Yearly-NDVI',
   fileFormat: 'CSV',
 });
 ```
 
+To access the export window on Google Earth Engine, click the task tab on the right panel.
+
+![Tasks Tab](https://i.imgur.com/Gf3i1cl.png)
+
+Then click the run button to export the data.
+
+![Tasks Tab](https://i.imgur.com/A6hh9kq.png)
+
+[Link to Script](https://code.earthengine.google.com/d9adbabe83d9a11c347449615fbea3f9)
+
+### Limitations of Google Earth Engine
+Exporting NDVI values for Kern county (359,893 plots) at one time point took 1 to 2 hours to export. The export time scales linearly with the number of time plots. For example, 40 time points took 3 days to compute.
+
 ### Visualizing Results
+<!-- TODO: Done Via Python Upload Scripts -->
