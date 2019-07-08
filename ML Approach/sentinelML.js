@@ -1,68 +1,57 @@
 Map.setCenter(-119.44,35.65);
+//Bands used for classification (NDVI)
+var bands = ['NDVI'];
 
-var bands = ['B5','B4', 'B3'];
+//Filter Land IQ
+var nonUrban = iq.filter(ee.Filter.neq("Crop2014", "Urban"));
+var filtered = nonUrban.filter(ee.Filter.eq("County", "Kern"));
 
-var sentinel_image = ee.Image(ee.ImageCollection('COPERNICUS/S2')
-  .filterDate('2014-05-01', '2014-05-10')
-  .filterBounds(roi)
-  .sort('CLOUDY_PIXEL_PERCENTAGE', true)
-  .first());
+// Filter sentinel images to classify
+var sentinelCollection = ee.ImageCollection('COPERNICUS/S2')
+  .filterBounds(filtered.geometry())
+  .filterDate('2018-05-01', '2018-05-03')
+  .select(['B8','B4'])
+  .sort('CLOUDY_PIXEL_PERCENTAGE', true);
 
-Map.addLayer(sentinel_image, bands, "Sentinel-2")
+// mosaic the images together, since Sentinel 2 has smaller images
+var sentinelImg = ee.Image(sentinelCollection.toList(sentinelCollection.size()).get(1));
 
-//Filter Landsat
-var image = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1')
-  .filterBounds(roi)
-  .filterDate('2014-5-01', '2014-5-10')
-  .sort('CLOUD_COVER')
-  .first());
-  
+var addNDVIBand = function(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename("NDVI");
+  return image.addBands(ndvi);
+};
+sentinelImg = addNDVIBand(sentinelImg);
 
-Map.addLayer(all_fallow);
-//Map.addLayer(image, bands, 'Landsat');
+// Map.addLayer(all_fallow, {}, "Kern");
+Map.addLayer(sentinelImg, bands, 'Sentinel');
+//Map.addLayer(iq, {color: '000000'}, 'IQ');
+Map.addLayer(filtered, {}, 'Filtered');
 
-//Merging imports of sample regions into one feature collection 
+//Merging imports of sample regions into one feature collection
 var trainingFC = not_fallowed.merge(fallowed);
 
 //Training data
-var training = image.select(bands).sampleRegions({
+var training = sentinelImg.select(bands).sampleRegions({
   collection: trainingFC,
   properties: ['landcover'],
   scale: 30
 });
 
 //CART Classifier Training
-var classifier = ee.Classifier.cart().train({
+var trainedClassifier = ee.Classifier.cart().train({
   features: training,
-  classProperty: 'landcover', 
+  classProperty: 'landcover',
   inputProperties: bands
-  
 });
 
-//Random Forest Classifier Training
-// var classifier = ee.Classifier.randomForest().train({
-//   features: training,
-//   classProperty: 'landcover', 
-//   inputProperties: bands
-  
-// });
-
-//SVM Classifier Training
-// var classifier = ee.Classifier.svm().train({
-//   features: training,
-//   classProperty: 'landcover', 
-//   inputProperties: bands
-// });
-
-
-//Run classification 
-var classified = image.select(bands).classify(classifier);
+//Run classification
+var classified = sentinelImg.select(bands).classify(trainedClassifier);
 
 //Displaying results
-Map.centerObject(roi, 11);
+Map.centerObject(iqROI, 7.5);
 
 //70FF00 (green) not fallowed, FF2D000 (red) fallowed
-Map.addLayer(classified, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']}, 
+Map.addLayer(classified, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']},
 'classification');
 
 var withRandom = training.randomColumn('random');
@@ -81,20 +70,7 @@ var trainedClassifier = ee.Classifier.cart().train({
   inputProperties: bands
 });
 
-//Random Forest Testing
-// var trainedClassifier = ee.Classifier.randomForest().train({
-//   features: trainingPartition,
-//   classProperty: 'landcover',
-//   inputProperties: bands
-// });
-
-//SVM Testing
-// var trainedClassifier = ee.Classifier.svm().train({
-//   features: trainingPartition,
-//   classProperty: 'landcover',
-//   inputProperties: bands
-// });
-
+//Classifying on Testing Partition
 var test = testingPartition.classify(trainedClassifier);
 
 //Confusion Matrix
