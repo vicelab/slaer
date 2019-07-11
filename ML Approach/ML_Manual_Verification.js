@@ -1,7 +1,9 @@
 Map.setCenter(-119.44,35.65);
 
-//Bands used for classification (NDVI)
-var bands = ['NDVI'];
+var nd = ['NDVI'], ms = ["MSAVI2"];
+var landSatRGB = ['B3','B2','B1'], sentinelRGB = ['B4','B3','B2'];
+// var satNir = 'B4', satRed = 'B3'; // landsat
+var satNir = 'B8', satRed = 'B4'; // sentinel
 
 // Dates
 // var startDate = "2014-5-01", endDate = "2014-5-10"; // landsat
@@ -14,68 +16,124 @@ var filtered = nonUrban.filter(ee.Filter.eq("County", "Kern"));
 
 
 // //Filter Training Input
-// var landSat = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_8DAY_NDVI')
-//   .filterDate(startDate,endDate)
-//   .select(bands)
+// var landSat = ee.Image(ee.ImageCollection('LANDSAT/LE07/C01/T1')
+//   .filterDate(startDate,ee.Date(startDate).advance(15,'day'))
+//   .select([satNir,satRed])
 //   .sort('CLOUD_COVER')
-//   .first());
-
+//   .mosaic()
+//   .addBands(ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_8DAY_NDVI')
+//     .filterDate(startDate,endDate)
+//     .select(nd)
+//     .sort('CLOUD_COVER')
+//     .first())));
 // //Filter to Classify on LandIQ
-// var landSatTest = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_8DAY_NDVI')
+// var landSatTest = ee.Image(ee.ImageCollection('LANDSAT/LE07/C01/T1')
 //   .filterBounds(filtered.geometry())
-//   .filterDate(startDate,endDate)
-//   .select(bands)
+//   .filterDate(startDate,ee.Date(startDate).advance(15,'day'))
+//   .select([satNir,satRed])
 //   .sort('CLOUD_COVER')
-//   .first());
+//   .mosaic()
+//   .addBands(ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_8DAY_NDVI')
+//     .filterBounds(filtered.geometry())
+//     .filterDate(startDate,endDate)
+//     .select(nd)
+//     .sort('CLOUD_COVER')
+//     .first())));
 
+
+// Sentinel training input
+var sentinel = ee.Image(ee.ImageCollection('COPERNICUS/S2')
+  .filterDate(startDate, endDate)
+  .select([satNir,satRed])
+  .sort('CLOUDY_PIXEL_PERCENTAGE', false)
+  .mosaic()); // mosaic the images together, since Sentinel 2 has smaller images
 // Filter sentinel images to classify
-var sentinelCollection = ee.ImageCollection('COPERNICUS/S2')
+var sentinelTest = ee.Image(ee.ImageCollection('COPERNICUS/S2')
   .filterBounds(filtered.geometry())
   .filterDate(startDate,endDate)
-  .select(['B8','B4'])
-  .sort('CLOUDY_PIXEL_PERCENTAGE', false);
+  .select([satNir,satRed])
+  .sort('CLOUDY_PIXEL_PERCENTAGE', false)
+  .mosaic());
 
-// mosaic the images together, since Sentinel 2 has smaller images
-var sentinelImg = ee.Image(sentinelCollection.mosaic());
-
-var addNDVIBand = function(image) {
-  var ndvi = image.normalizedDifference(['B8', 'B4']).rename("NDVI");
+// functions to calculate index bands
+var addNDVI = function(image) {
+  var ndvi = image.normalizedDifference([satNir,satRed]).rename("NDVI");
   return image.addBands(ndvi);
 };
-sentinelImg = addNDVIBand(sentinelImg);
+var addMSAVI2 = function(image) {
+  var nir = image.select([satNir]), red = image.select([satRed]);
+  var msavi2 = nir.multiply(2).add(1).subtract( nir.multiply(2).add(1).pow(2).subtract(nir.subtract(red).multiply(8)).sqrt() ).divide(2).rename('MSAVI2');
+  return image.addBands(msavi2);
+};
+// landSat = addMSAVI2(landSat);
+// landSatTest = addMSAVI2(landSatTest);
+sentinel = addMSAVI2(addNDVI(sentinel));
+sentinelTest = addMSAVI2(addNDVI(sentinelTest));
 
-// Map.addLayer(landSatTest, bands, 'LandSat');
-// Map.addLayer(sentinelImg, bands, 'Sentinel');
+// draw the raw satellite image for comparison
+// var rawImage = ee.Image(ee.ImageCollection('LANDSAT/LE07/C01/T1')
+var rawImage = ee.Image(ee.ImageCollection('COPERNICUS/S2')
+  .filterBounds(filtered.geometry())
+  .filterDate(startDate,ee.Date(startDate).advance(1,'month'))
+  // .select(landSatRGB)
+  // .sort('CLOUD_COVER')
+  .select(sentinelRGB)
+  .sort('CLOUDY_PIXEL_PERCENTAGE', false)
+  .mosaic());
+// Map.addLayer(rawImage,{bands: landSatRGB},"RawLandSat");
+Map.addLayer(rawImage,{min: 0.0, max: 3000, bands: sentinelRGB},"RawSentinel");
+
 // Map.addLayer(filtered, {}, 'Filtered');
+// Map.addLayer(landSatTest, {bands: nd}, 'LandSatNDVI');
+// Map.addLayer(landSatTest, {bands: ms}, 'LandSatMSAVI2');
+Map.addLayer(sentinelTest, {bands: nd}, 'SentinelNDVI');
+Map.addLayer(sentinelTest, {bands: ms}, 'SentinelMSAVI2');
+
 
 //Merging imports of sample regions into one feature collection
 // var trainingFC = not_fallowed.merge(fallowed);
 var trainingFC = not_fallowed_sentinel.merge(fallowed);
 
 //Training data
-// var training = landSat.select(bands).sampleRegions({
-var training = sentinelImg.select(bands).sampleRegions({
+// var trainingNDVI = landSat.select(nd).sampleRegions({
+var trainingNDVI = sentinel.select(nd).sampleRegions({
   collection: trainingFC,
   properties: ['landcover'],
-  scale: 30
+  // scale: 30 // landsat
+  scale: 10 // sentinel
+});
+// var trainingMSAVI = landSat.select(ms).sampleRegions({
+var trainingMSAVI = sentinel.select(ms).sampleRegions({
+  collection: trainingFC,
+  properties: ['landcover'],
+  // scale: 30 // landsat
+  scale: 10 // sentinel
 });
 
 //CART Classifier Training
-var trainedClassifier = ee.Classifier.cart().train({
-  features: training,
+var ndviClassifier = ee.Classifier.cart().train({
+  features: trainingNDVI,
   classProperty: 'landcover',
-  inputProperties: bands
+  inputProperties: nd
+});
+var msaviClassifier = ee.Classifier.cart().train({
+  features: trainingMSAVI,
+  classProperty: 'landcover',
+  inputProperties: ms
 });
 
 //Run classification
-// var classified = landSatTest.select(bands).classify(trainedClassifier);
-var classified = sentinelImg.select(bands).classify(trainedClassifier);
+// var classifiedNDVI = landSatTest.select(nd).classify(ndviClassifier);
+// var classifiedMSAVI = landSatTest.select(ms).classify(msaviClassifier);
+var classifiedNDVI = sentinelTest.select(nd).classify(ndviClassifier);
+var classifiedMSAVI = sentinelTest.select(ms).classify(msaviClassifier);
 
 //Displaying results
 Map.centerObject(iqROI, 7.5);
 
 //70FF00 (green) not fallowed, FF2D000 (red) fallowed
-Map.addLayer(classified, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']}, 'classification');
+Map.addLayer(classifiedNDVI, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']}, 'NDVI classif.');
+Map.addLayer(classifiedMSAVI, {min: 0, max: 1, palette: ['70FF00', 'FF2D00']}, 'MSAVI2 classif.');
 
 
 // 'Manual' classification check
@@ -102,9 +160,7 @@ var k = 100; // number of random plots to manually check
 // for (var i = 0; i < k; i++) randomSet.push(i);
 // for (var i = k; i < totalPlots; i++) {
 //   var j = Math.floor(Math.random()*i);
-//   if (j<k) {
-//     randomSet[j] = i;
-//   }
+//   if (j<k) randomSet[j] = i;
 // }
 // print(randomSet);
 
@@ -124,24 +180,6 @@ var randomPlotsList = ee.List(randomSet).map(function(index) {
 var randomPlots = ee.FeatureCollection(randomPlotsList);
 Map.addLayer(randomPlots,null,"random");
 // print(randomPlots);
-
-
-// draw the raw satellite image for comparison
-// var rawImages = ee.ImageCollection('LANDSAT/LE07/C01/T1')
-var rawImages = ee.ImageCollection('COPERNICUS/S2')
-  .filterBounds(randomPlots)
-  // .filterDate(startDate,"2014-6-01")
-  .filterDate(startDate,"2018-6-01")
-  // .select(['B3', 'B2', 'B1']) // landsat
-  // .sort('CLOUD_COVER'); // ls
-  .sort('CLOUDY_PIXEL_PERCENTAGE', false);
-var rawImage = ee.Image(rawImages.mosaic());
-Map.addLayer(rawImage,null,"RawLandSat")
-Map.addLayer(rawImage,{
-  min: 0.0,
-  max: 3000,
-  bands: ['B4', 'B3', 'B2'],
-},"RawSentinel");
 
 
 // // Draw classification only on random plots
@@ -171,9 +209,11 @@ var showPlot = function(index) {
   var plot = getPlot(index);
   plotNumLabel.setValue("Plot #"+randomSet[index]);
   removeLayer("ChosenPlot");
-  removeLayer("classifiedPlot");
+  removeLayer("classifiedNDVIPlot");
+  removeLayer("classifiedMSAVIPlot");
   Map.addLayer(plot,null,"ChosenPlot");
-  Map.addLayer(classified.clip(plot),{min: 0, max: 1, palette: ['70FF00', 'FF2D00']},'classifiedPlot');
+  Map.addLayer(classifiedNDVI.clip(plot),{min: 0, max: 1, palette: ['70FF00', 'FF2D00']},'classifiedNDVIPlot');
+  Map.addLayer(classifiedMSAVI.clip(plot),{min: 0, max: 1, palette: ['70FF00', 'FF2D00']},'classifiedMSAVIPlot');
   Map.centerObject(plot);
 }
 
